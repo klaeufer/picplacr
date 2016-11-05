@@ -53,4 +53,4 @@ for pic in w:
     if t < start_time:
         print('Photo {} skipped'.format(pic))
         continue
-    print('Photo {} was taken at {}'.format(pic, point_at(all_points(gpx), t)))
+    print('Photo {} was taken near {}'.format(pic, point_at(all_points(gpx), t)))
