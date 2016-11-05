@@ -35,5 +35,5 @@ Photo Photo(id='29774162783', title='DSC06852.JPG') was taken at [trkpt:37.62004
 
 # Dependencies
 
-- flickr-api
-- gpxpy
+- [flickr-api](https://github.com/alexis-mignon/python-flickr-api)
+- [gpxpy](http://www.trackprofiler.com/gpxpy/index.html)
