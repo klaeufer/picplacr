@@ -29,7 +29,7 @@ This track starts at 2016-08-03 17:11:24 and ends at 2016-08-03 18:39:47
 Processing Flickr album 2016-07 WY-UT-CO Part 4
 Photo Photo(id='30108501350', title='DSC06819.JPG') skipped
 ...
-Photo Photo(id='29774162783', title='DSC06852.JPG') was taken at [trkpt:37.6200453,-105.5601899@2765.56999969@2016-08-03 17:21:32]
+Photo Photo(id='29774162783', title='DSC06852.JPG') was taken near [trkpt:37.6200453,-105.5601899@2765.56999969@2016-08-03 17:21:32]
 ...
 ```
 
