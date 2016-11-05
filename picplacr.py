@@ -1,9 +1,5 @@
 #! /usr/bin/env python
 
-# TODO handle reauth
-# TODO dry run versus in-place update
-# TODO modularize
-
 import argparse
 import os
 import gpxpy
