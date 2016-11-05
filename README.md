@@ -18,7 +18,7 @@ optional arguments:
 
 # Limitations 
 
-Only determines which pictures in a given album lie along a given GPX track. Does not quite yet actually geotag the pictures it finds.
+So far, only determines which pictures in a given album lie along a given GPX track. Does not quite yet actually geotag the pictures it finds. Hoping to work on this in the near future.
 
 # Example
 
