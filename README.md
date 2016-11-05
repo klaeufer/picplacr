@@ -16,6 +16,10 @@ optional arguments:
                         hours to add to local timestamp on photos to get UTC
 ```
 
+# Limitations 
+
+Only determines which pictures in a given album lie along a given GPX track. Does not quite yet actually geotag the pictures it finds.
+
 # Example
 
 ```
