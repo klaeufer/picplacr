@@ -1,7 +1,9 @@
 # Overview
 
 `picplacr` is a simple command-line tool for geotagging photos in a
-Flickr album based on one or more GPX tracks.
+Flickr album based on one or more GPX tracks. It geotags only photos
+that fall within the time bounds of one of the tracks and ignores all
+others.
 
 My main use case for this tool is geotagging the many pictures I took
 with my Sony a6000 during hiking or scenic backcountry driving and
