@@ -2,55 +2,65 @@
 
 import argparse
 import os
+import sys
+import datetime
+import flickrapi
 import gpxpy
 import gpxpy.gpx
-import datetime
-import flickr_api
-from flickr_api import Walker
 
-parser = argparse.ArgumentParser(
-    description='geotag pictures in a Flickr album based on a GPX track')
-parser.add_argument('-t', '--track', required=True,
-                    help='GPX track')
-parser.add_argument('-a', '--album', required=True,
-                    help='Flickr album')
+api_key = os.environ['FLICKR_API_KEY']
+api_secret = os.environ['FLICKR_API_SECRET']
+
+parser = argparse.ArgumentParser(description='geotag pictures in a Flickr album based on a GPX track')
+parser.add_argument('-t', '--track', nargs='+', help='GPX track(s)')
+parser.add_argument('-a', '--album', required=True, help='Flickr album')
 parser.add_argument('-o', '--offset', required=True, type=int,
                     help='hours to add to local timestamp on photos to get UTC')
 args = parser.parse_args()
 
-TRACK = args.track
+TRACKS = args.track
 ALBUM = args.album
 OFFSET = args.offset
-AUTH_FILE = os.environ.get('HOME') + '/.flickrauth'
 
-print('Processing GPS track {}'.format(TRACK))
-f = open(TRACK, 'r')
-gpx = gpxpy.parse(f)
-start_time = gpx.tracks[0].segments[0].points[0].time
-end_time = gpx.tracks[-1].segments[-1].points[-1].time
-print('This track starts at {} and ends at {}'.format(start_time, end_time))
+try:
+    print('Authenticating on Flickr')
+    flickr = flickrapi.FlickrAPI(api_key, api_secret, format='etree')
+    flickr.authenticate_via_browser(perms='write')
+except flickrapi.exceptions.FlickrError:
+    print('Cannot authenticate on Flickr!')
+    sys.exit(2)    
 
-def all_points(gpx):
-    for track in gpx.tracks:
-        for segment in track.segments:
-            for point in segment.points:
-                yield point
+try:
+    print('Verifying Flickr album {}'.format(ALBUM))
+    psets = flickr.photosets.getList()
+    pset = next(s for s in psets.find('photosets').findall('photoset') if s.find('title').text == ALBUM)
+    print('This album has {} photos'.format(pset.get('photos')))
+except StopIteration:
+    print('Flickr album {} not found!'.format(ALBUM))
+    sys.exit(1)
 
-def point_at(ps, t):
-    return next(p for p in ps if p.time > t)
-                
-print('Processing Flickr album {}'.format(ALBUM))
-flickr_api.set_auth_handler(AUTH_FILE)
-user = flickr_api.test.login()
-photosets = user.getPhotosets()
-pset = next(s for s in photosets if s.title == ALBUM)
+# combine all GPS tracks into one
+gpx = gpxpy.gpx.GPX()
+for t in TRACKS:
+    print('Processing GPS track {}'.format(t))
+    f = open(t, 'r')
+    g = gpxpy.parse(f)
+    gpx.tracks.extend(g.tracks)
 
-w = Walker(pset.getPhotos)
-for pic in w:
-    t = datetime.datetime.strptime(pic.taken, '%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=OFFSET)
-    if t > end_time:
-        break
-    if t < start_time:
-        print('Photo {} skipped'.format(pic))
-        continue
-    print('Photo {} was taken near {}'.format(pic, point_at(all_points(gpx), t)))
+time_bounds = gpx.get_time_bounds()
+print('These tracks start at {} and end at {}'.format(time_bounds.start_time, time_bounds.end_time))
+
+for photo in flickr.walk_set(pset.get('id')):
+    id = photo.get('id')
+    p = flickr.photos.getInfo(photo_id=id)
+    taken = p.find('photo').find('dates').get('taken')
+    taken_dt = datetime.datetime.strptime(taken, '%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=OFFSET)
+    trackpoints = gpx.get_location_at(taken_dt)
+    print('Photo {} was taken on {} at {}'.format(id, taken_dt, trackpoints))
+    for tp in trackpoints:
+        print('Trying to geotag it now...')
+        resp = flickr.photos.geo.setLocation(photo_id=id, lat=unicode(tp.latitude), lon=unicode(tp.longitude))
+        if resp.get('stat') == 'ok':
+            print('Success!')
+        else:
+            print('Fail')
