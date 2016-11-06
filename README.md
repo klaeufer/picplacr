@@ -54,5 +54,5 @@ Success!
 
 Please install these dependencies using `pip` before using `picplacr`.
 
-- [flickr-api](https://github.com/sybrenstuvel/flickrapi)
+- [flickrapi](https://github.com/sybrenstuvel/flickrapi)
 - [gpxpy](https://github.com/tkrajina/gpxpy)
